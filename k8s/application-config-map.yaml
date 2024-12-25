@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resources-service-config
+  namespace: k8s-java-engineers
+data:
+  RESOURCES_MS_NAME: "resources-ms"
+  RESOURCES_MS_PORT: "8080"
+  SONGS_MS_URL: "localhost"
+  SONGS_MS_PORT: "8081"
+  EUREKA_URI: "localhost"
+  ENABLE_EUREKA_CLIENT: "false"
+  RESOURCES_DB_URL: "resources-db-service"
+  RESOURCES_DB_PORT: "5432"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: songs-service-config
+  namespace: k8s-java-engineers
+data:
+  SONGS_MS_NAME: "songs-ms"
+  SONGS_MS_PORT: "8081"
+  EUREKA_URI: "localhost"
+  ENABLE_EUREKA_CLIENT: "false"
+  SONGS_DB_URL: "songs-db-service"
+  SONGS_DB_PORT: "5432"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: songs-db-init-scripts
+  namespace: k8s-java-engineers
+data:
+  init.sql: |
+    CREATE TABLE songs (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255),
+        artist VARCHAR(255),
+        album VARCHAR(255),
+        length VARCHAR(255),
+        resource_id INTEGER NOT NULL UNIQUE,
+        year VARCHAR(255)
+    );
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resources-db-init-scripts
+  namespace: k8s-java-engineers
+data:
+  init.sql: |
+    CREATE TABLE resources (
+        id SERIAL PRIMARY KEY,
+        blob blob
+    );

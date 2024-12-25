@@ -14,20 +14,19 @@ spec:
     path: /data/postgres
 
 
-#---
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  name: songs-db-pvc
-#  namespace: k8s-java-engineers
-#spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests:
-#      storage: 1Gi
-#  storageClassName: manual
-
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: songs-db-pvc
+  namespace: k8s-java-engineers
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
 
 ---
 apiVersion: apps/v1
@@ -52,20 +51,60 @@ spec:
           env:
             - name: POSTGRES_DB
               value: postgres
-            - name: POSTGRES_USER
-              value: postgres
-            - name: POSTGRES_PASSWORD
-              value: postgres
             - name: POSTGRES_PORT
               value: "5432"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: songs-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: songs-db-secret
+                  key: POSTGRES_PASSWORD
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  pg_isready -U "$POSTGRES_USER"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  pg_isready -U "$POSTGRES_USER"
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  pg_isready -U "$POSTGRES_USER"
+            periodSeconds: 10
+            failureThreshold: 3
           ports:
             - containerPort: 5432
               name: song-db
 
           volumeMounts:
+            - name: db-init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
             - mountPath: /var/lib/postgresql/data
               name: songs-db-storage
       volumes:
+        - name: db-init-scripts
+          configMap:
+            name: songs-db-init-scripts
         - name: songs-db-storage
           persistentVolumeClaim:
             claimName: songs-db-pvc
