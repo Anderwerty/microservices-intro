@@ -18,23 +18,60 @@ spec:
     spec:
       containers:
         - name: songs-service-container
-          image: songs-service-app:latest
+          image: songs-service-app:1
           imagePullPolicy: Never
           ports:
             - containerPort: 8081
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 25
+            periodSeconds: 30
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            periodSeconds: 10
+            failureThreshold: 3
           env:
             - name: SONGS_MS_NAME
-              value: "songs-ms"
+              valueFrom:
+                configMapKeyRef:
+                  name: songs-service-config
+                  key: SONGS_MS_NAME
             - name: SONGS_MS_PORT
-              value: "8081"
+              valueFrom:
+                configMapKeyRef:
+                  name: songs-service-config
+                  key: SONGS_MS_PORT
             - name: EUREKA_URI
-              value: "localhost"
+              valueFrom:
+                configMapKeyRef:
+                  name: songs-service-config
+                  key: EUREKA_URI
             - name: ENABLE_EUREKA_CLIENT
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: songs-service-config
+                  key: ENABLE_EUREKA_CLIENT
             - name: SONGS_DB_URL
-              value: "songs-db-service"
+              valueFrom:
+                configMapKeyRef:
+                  name: songs-service-config
+                  key: SONGS_DB_URL
             - name: SONGS_DB_PORT
-              value: "5432"
+              valueFrom:
+                configMapKeyRef:
+                  name: songs-service-config
+                  key: SONGS_DB_PORT
 
 ---
 apiVersion: v1
