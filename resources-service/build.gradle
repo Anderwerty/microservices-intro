@@ -11,6 +11,10 @@ java {
     sourceCompatibility = '17'
 }
 
+bootJar {
+    mainClass = 'com.ms.intro.ResourcesApplication'
+}
+
 jar {
     enabled = false
 }
