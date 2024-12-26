@@ -1,13 +1,10 @@
 package com.ms.intro.domain;
 
-import com.ms.intro.dto.SongDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.util.Objects;
 
 @Entity
 @Table(name = "songs")
@@ -35,6 +32,9 @@ public class SongData {
 
     @Column(unique = true, nullable = false)
     Integer resourceId;
+
+    @Column(nullable = true)
+    String genre;
 
     @Column(nullable = true)
     String year;

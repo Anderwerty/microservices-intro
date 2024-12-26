@@ -92,7 +92,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: resources-service
+    app: resources-service-app
   ports:
     - protocol: TCP
       port: 8080
