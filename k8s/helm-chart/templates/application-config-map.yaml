@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    currentDate: {{ include "app.currentDate" . }}
+    version: {{ include "app.version" . }}
+data:
+  RESOURCES_MS_NAME: "resources-service-app"
+  RESOURCES_MS_PORT: "8080"
+  SONGS_MS_URL: "songs-service-app"
+  SONGS_MS_PORT: "8081"
+  EUREKA_URI: "localhost"
+  ENABLE_EUREKA_CLIENT: "false"
+  RESOURCES_DB_URL: "resources-db-service"
+  RESOURCES_DB_PORT: "5432"
+  SONGS_MS_NAME: "songs-service-app"
+  SONGS_DB_URL: "songs-db-service"
+  SONGS_DB_PORT: "5432"
