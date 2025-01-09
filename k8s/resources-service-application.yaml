@@ -18,27 +18,70 @@ spec:
     spec:
       containers:
         - name: resources-service-container
-          image: resources-service-app:latest
+          image: resources-service-app:1
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 30
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
           env:
             - name: RESOURCES_MS_NAME
-              value: "resources-ms"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: RESOURCES_MS_NAME
             - name: RESOURCES_MS_PORT
-              value: "8080"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: RESOURCES_MS_PORT
             - name: SONGS_MS_URL
-              value: "localhost"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: SONGS_MS_URL
             - name: SONGS_MS_PORT
-              value: "8081"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: SONGS_MS_PORT
             - name: EUREKA_URI
-              value: "localhost"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: EUREKA_URI
             - name: ENABLE_EUREKA_CLIENT
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: ENABLE_EUREKA_CLIENT
             - name: RESOURCES_DB_URL
-              value: "resources-db-service"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: RESOURCES_DB_URL
             - name: RESOURCES_DB_PORT
-              value: "5432"
+              valueFrom:
+                configMapKeyRef:
+                  name: resources-service-config
+                  key: RESOURCES_DB_PORT
 
 ---
 apiVersion: v1
@@ -49,7 +92,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: resources-service
+    app: resources-service-app
   ports:
     - protocol: TCP
       port: 8080
