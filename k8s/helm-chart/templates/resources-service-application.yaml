@@ -1,0 +1,100 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resources-service-app-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: resources-service-app
+spec:
+  replicas:  {{.Values.resourcesService.replicaCount }}
+  selector:
+    matchLabels:
+      app: resources-service-app
+  template:
+    metadata:
+      labels:
+        app: resources-service-app
+    spec:
+      containers:
+        - name: resources-service-container
+          image: resources-service-app:1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 30
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
+          env:
+            - name: RESOURCES_MS_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: RESOURCES_MS_NAME
+            - name: RESOURCES_MS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: RESOURCES_MS_PORT
+            - name: SONGS_MS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: SONGS_MS_URL
+            - name: SONGS_MS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: SONGS_MS_PORT
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: EUREKA_URI
+            - name: ENABLE_EUREKA_CLIENT
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: ENABLE_EUREKA_CLIENT
+            - name: RESOURCES_DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: RESOURCES_DB_URL
+            - name: RESOURCES_DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: application-config
+                  key: RESOURCES_DB_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resources-service
+  namespace: {{ .Values.namespace }}
+spec:
+  type: NodePort
+  selector:
+    app: resources-service-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30001

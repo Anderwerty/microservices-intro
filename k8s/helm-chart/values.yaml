@@ -1,0 +1,24 @@
+namespace: k8s-java-engineers
+appVersion: "1.0.1"
+
+resourcesService:
+  image: resources-service-app:1
+  replicaCount: 2
+
+songsService:
+  image: songs-service-app:2
+  replicaCount: 2
+
+resourcesDatabase:
+  image: postgres:latest
+
+songsDatabase:
+  image: postgres:latest
+
+secrets:
+  resourcesDatabase:
+    postgresUser: cG9zdGdyZXM=
+    postgresPassword: cG9zdGdyZXM=
+  songsDatabase:
+    postgresUser: cG9zdGdyZXM=
+    postgresPassword: cG9zdGdyZXM=
